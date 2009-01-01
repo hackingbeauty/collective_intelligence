@@ -3,7 +3,7 @@
 #
 # 			Recommendation system
 #
-
+DEBUG = 0
 @people = {'Lisa Rose'=> {'Lady in the Water'=> 2.5, 'Snakes on a Plane'=> 3.5,
  'Just My Luck'=> 3.0, 'Superman Returns'=> 3.5, 'You, Me and Dupree'=> 2.5, 
  'The Night Listener'=> 3.0},
@@ -37,9 +37,11 @@ def euclidean(people, person1, person2)
 	1 / (1 + sum_of_squares)
 end
 
+if DEBUG > 0
 new_example
 test = euclidean(@people, 'Lisa Rose', 'Gene Seymour')
 puts "#{test} should equal 0.148148148148"
+end
 
 # Returns the Pearson correlation coefficient for p1 and p2
 # Pearson corrects for 'grade inflation'
@@ -77,26 +79,34 @@ def pearson(people, p1, p2)
 
 end
 
+if DEBUG > 0
+
 new_example
 test = pearson(@people, 'Lisa Rose', 'Gene Seymour')
 puts "#{test} should equal 0.396059017191"
+end
 
 # Returns the best matches for person from the prefs dictionary.
 # Number of results is an optional param.
 # The similarity method is a block.
 def top_matches(people, person, n=5)
 	scores = people.map do |critic, items|
-		[yield(@people, person, critic), critic] unless person == critic
+		unless person == critic
+			[(block_given? ? yield(people, person, critic) : pearson(people, person, critic)), critic]
+		end
 	end
 
 	scores.compact.sort.reverse[0..n]
 
 end
 
+if DEBUG > 0
+
 new_example
 test = top_matches(@people, 'Toby', 3) { |people, person, critic| pearson(people, person, critic) }
 puts "#{test.join(", ")} should equal #{[[0.99124070716192991, 'Lisa Rose'], [0.92447345164190486, 'Mick LaSalle'], [0.89340514744156474, 'Claudia Puig']].join(", ")}"
 
+end
 
 # Gets recommendations for a person by using a weighted average 
 # of every other user's rankings 
@@ -137,12 +147,32 @@ def recommendations(people, person)
 	rankings.sort.reverse
 end
 
+if DEBUG > 0
+
 new_example
 test = recommendations(@people, 'Toby')
 puts "#{test.join(", ")} should equal [(3.3477895267131013, 'The Night Listener'), (2.8325499182641614, 'Lady in the Water'), (2.5309807037655645, 'Just My Luck')]"
+end
 
+# Take the original hash, which is indexed by people
+# and transform it to be indexed by item
+def transform_hash(people)
+	 h = Hash.new {|hash, key| hash[key] = {}}
 
+	 people.each do |person, ratings|
+	 	ratings.each {|item, rating| 	h[item][person] = rating }
+	 end
 
+	 h
+
+end
+
+if DEBUG > 0
+new_example
+items = transform_hash(@people)
+test = top_matches(items, 'Superman Returns')
+puts "#{test.join(", ")} should equal [(0.657, 'You, Me and Dupree'), (0.487, 'Lady in the Water'), (0.111, 'Snakes on a Plane'), (-0.179, 'The Night Listener'), (-0.422, 'Just My Luck')] "
+end
 #########################################################################################
 #########################################################################################
 
