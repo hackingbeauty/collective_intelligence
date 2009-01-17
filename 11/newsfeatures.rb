@@ -137,104 +137,100 @@ end
 
 ################# Finding features
 
-FEEDLIST = ['http://today.reuters.com/rss/topNews', 
-          'http://today.reuters.com/rss/domesticNews',
-          'http://today.reuters.com/rss/worldNews', 
-          'http://hosted.ap.org/lineups/TOPHEADS-rss_2.0.xml', 
-          'http://hosted.ap.org/lineups/USHEADS-rss_2.0.xml', 
-          'http://hosted.ap.org/lineups/WORLDHEADS-rss_2.0.xml', 
-          'http://hosted.ap.org/lineups/POLITICSHEADS-rss_2.0.xml', 
-          'http://www.nytimes.com/services/xml/rss/nyt/HomePage.xml', 
-          'http://www.nytimes.com/services/xml/rss/nyt/International.xml', 
-          'http://news.google.com/?output=rss', 
-          'http://feeds.salon.com/salon/news', 
-          'http://www.foxnews.com/xmlfeed/rss/0,4313,0,00.rss', 
-          'http://www.foxnews.com/xmlfeed/rss/0,4313,80,00.rss', 
-          'http://www.foxnews.com/xmlfeed/rss/0,4313,81,00.rss', 
-          'http://rss.cnn.com/rss/edition.rss', 
-          'http://rss.cnn.com/rss/edition_world.rss', 
-          'http://rss.cnn.com/rss/edition_us.rss'] 
-
-
-
-
-
 class FeatureFinder
+
+	FEEDLIST = ['http://feeds.reuters.com/reuters/topNews', 
+          'http://feeds.reuters.com/reuters/domesticNews',
+          'http://feeds.reuters.com/reuters/worldNews']
+
+          # 'http://hosted.ap.org/lineups/TOPHEADS-rss_2.0.xml', 
+          # 'http://hosted.ap.org/lineups/USHEADS-rss_2.0.xml', 
+          # 'http://hosted.ap.org/lineups/WORLDHEADS-rss_2.0.xml', 
+          # 'http://hosted.ap.org/lineups/POLITICSHEADS-rss_2.0.xml', 
+          # 'http://www.nytimes.com/services/xml/rss/nyt/HomePage.xml', 
+          # 'http://www.nytimes.com/services/xml/rss/nyt/International.xml', 
+          # 'http://news.google.com/?output=rss', 
+          # 'http://feeds.salon.com/salon/news', 
+          # 'http://www.foxnews.com/xmlfeed/rss/0,4313,0,00.rss', 
+          # 'http://www.foxnews.com/xmlfeed/rss/0,4313,80,00.rss', 
+          # 'http://www.foxnews.com/xmlfeed/rss/0,4313,81,00.rss', 
+          # 'http://rss.cnn.com/rss/edition.rss', 
+          # 'http://rss.cnn.com/rss/edition_world.rss', 
+          # 'http://rss.cnn.com/rss/edition_us.rss'] 
+
+	attr :all_words
+	attr :article_words
+	attr :article_titles
+	attr :wordvec
+	attr :ec
+	attr :matrix
+
+	def initialize
+		@all_words = Hash.new(0)
+		@article_words = Hash.new {|h, k| h[k] = Hash.new(0)}
+		@article_titles = []; @wordvec =[]
+		@ec=0
+	end
+
+	def titles_and_matrix
+		get_article_words
+		make_matrix
+		# weights,features = make_matrix.factorize(10,50)
+		weights,features = @matrix.factorize(10,50)
+		[@article_titles, @wordvec, weights,features]
+	end
+
+
 	# Extract invidual words, keeping track of how many times 
 	# each word is used overall, 
 	# as well as how many times it's used per article
 	def get_article_words
-		# article words is the words hashed by article  
-		all_words = Hash.new(0)
-		article_words = Hash.new {|h, k| h[k] = Hash.new(0)}
-		article_titles =[]
-		ec=0
-		
 		FEEDLIST.each do |feed|
-			
-			f = FeedNormalizer::FeedNormalizer.parse open(feed)
-			next if f.nil?
-			f.entries.each do |post|
-				next if article_titles.include?(post.title)
-
-				txt = post.title + post.content.strip_html
-				words = separate_words(txt)
-				article_titles << post.title
-
-				words.each do |word|
-					all_words[word] += 1
-					article_words[ec][word] += 1
-				end
-				
-				ec += 1
+			next unless (f = FeedNormalizer::FeedNormalizer.parse open(feed))
+			f.entries.each do |entry|
+				next if @article_titles.include?(entry.title)				
+				process_entry(entry)
+				@ec += 1
+				puts @ec
 			end
-
 		end
-		
-		[all_words, article_words, article_titles]  
+		# [@all_words, @article_words, @article_titles] s 
+	end
+
+	def process_entry(entry)
+		words = "#{entry.title} #{entry.content.strip_html}".separate_words
+		@article_titles << entry.title
+
+		words.each do |word|
+			@all_words[word] += 1
+			@article_words[@ec][word] += 1
+		end
 	end
 
 
-	def make_matrix(all_words, article_words)
-		wordvec =[]
-
+	def make_matrix
 		#select words that are common but not too common
-		all_words.each do |word, count|
-			wordvec << word if count > 3 && count < article_words.length * 0.6
-		end
-
-		matrix = article_words.map do |index, words|
-			wordvec.map do |word|
-				(words[word] > 0) ? 1 : 0
-			end
-		end
-		
-		[matrix, wordvec]
+		@all_words.each { |word, count| @wordvec << word if count > 3 && count < @article_words.length * 0.6 }
+		matrix = @article_words.map { |index, words| @wordvec.map {|word| (words[word] > 0) ? 1 : 0}}
+		@matrix = Linalg::DMatrix[*matrix]
+		#[matrix, wordvec]
 	end
 
-	# pg 254 tests
-	def test_254(verbose=false)
-		@allw,@artw,@artt = get_article_words
-		@wordmatrix,@wordvec = make_matrix(@allw,@artw)
-		if verbose
-			puts @wordvec[0..10]
-			puts @artt[1]
-			puts @wordmatrix[1][0..10]
-		end
-	end
-
-
-
-
-	def get_weights
-		test_254
-		@v = Linalg::DMatrix[*@wordmatrix]
-		@weights,@feat = factorize(@v,10,50)
-	end
 
 end
 
+
+################# Displaying features
+
 class FeatureDisplayer
+	
+	def initialize
+		ff = FeatureFinder.new
+		artt,wordvec,weights,features = ff.titles_and_matrix
+	  topp,pn = show_features(weights,features,artt,wordvec)
+		show_articles(artt,topp,pn)
+	end
+
 	def show_features(w,h,titles,wordvec,out='features.txt')
 		@h = h
 		@w = w
@@ -294,11 +290,6 @@ class FeatureDisplayer
 
 	end
 
-	def view_features
-		get_weights
-		@topp, @pn = show_features(@weights,@feat,@artt,@wordvec)
-	end
-
 	def show_articles(titles, toppatterns, patternnames,out='articles.txt')
 		File.open(out, 'w') do |results|
 			titles.length.times do |j|
@@ -316,11 +307,6 @@ class FeatureDisplayer
 		end
 	end
 
-
-	def by_article
-		view_features
-		show_articles(@artt, @topp, @pn)
-	end
-
-
 end
+
+FeatureDisplayer.new
