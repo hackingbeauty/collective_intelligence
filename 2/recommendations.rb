@@ -33,8 +33,9 @@ def euclidean(people, person1, person2)
 		people[person2][rating.first] ? sum + (rating_diff[rating.first] ** 2) : sum
 	end
 	return "Sum was 0" if sum_of_squares == 0.0
-
-	1 / (1 + sum_of_squares)
+	#errata
+	#
+	1 / (1 + Math.sqrt(sum_of_squares)
 end
 
 if DEBUG > 0
