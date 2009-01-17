@@ -83,6 +83,7 @@ class Linalg::DMatrix
 	def difcost(computed)
 		[*0..vsize-1].inject(0) do |sum, row|
 			hsize.times { |column| sum += (self[row,column] - computed[row,column]) ** 2 }
+			sum
 		end
 	end
 
@@ -95,10 +96,12 @@ class Linalg::DMatrix
 		
 		w = random_matrix(vsize-1, pc-1)
 		h = random_matrix(pc-1, hsize-1) 
-		seed = w * h
 		
 		iterations.times do |i|
+			seed = w*h
 			cost = difcost(seed)
+
+			puts "Diffcost: #{cost}" if i % 10 == 0
 	 
 			
 			# Terminate if matrix is fully factorized
@@ -123,16 +126,16 @@ class Linalg::DMatrix
 end
 
 # Tests from page 263
-describe "dealing with matrices" do
-	
-	it "should provide two matrices that when multiplied are nearly equal to the original matrix" do
-		@m1 = Linalg::DMatrix[[1,2,3],[4,5,6]]
-		@m2 = Linalg::DMatrix[[1,2],[3,4],[5,6]]
-		w,h = (@m1 * @m2).factorize(3,400)
-		(w * h).to_a.map{|e| e.map{|ei| ei.round}}.should == (@m1 * @m2).to_a
-	end
-
-end
+# describe "dealing with matrices" do
+# 	
+# 	it "should provide two matrices that when multiplied are nearly equal to the original matrix" do
+# 		@m1 = Linalg::DMatrix[[1,2,3],[4,5,6]]
+# 		@m2 = Linalg::DMatrix[[1,2],[3,4],[5,6]]
+# 		w,h = (@m1 * @m2).factorize(3,400)
+# 		(w * h).to_a.map{|e| e.map{|ei| ei.round}}.should == (@m1 * @m2).to_a
+# 	end
+# 
+# end
 
 
 ################# Finding features
@@ -142,20 +145,20 @@ class FeatureFinder
 	FEEDLIST = ['http://feeds.reuters.com/reuters/topNews',
           'http://feeds.reuters.com/reuters/domesticNews',
            'http://feeds.reuters.com/reuters/worldNews',
-           'http://hosted.ap.org/lineups/TOPHEADS-rss_2.0.xml?SITE=NCWIN&SECTION=HOME',
+	   				'http://hosted.ap.org/lineups/TOPHEADS-rss_2.0.xml?SITE=NCWIN&SECTION=HOME',
            'http://hosted.ap.org/lineups/USHEADS-rss_2.0.xml?SITE=OKPON&SECTION=HOME',
-           'http://hosted.ap.org/lineups/WORLDHEADS-rss_2.0.xml?SITE=KLIF&SECTION=HOME', 
-           'http://hosted.ap.org/lineups/POLITICSHEADS-rss_2.0.xml?SITE=SCGRE&SECTION=HOME', 
-           'http://www.nytimes.com/services/xml/rss/nyt/HomePage.xml', 
+           'http://hosted.ap.org/lineups/WORLDHEADS-rss_2.0.xml?SITE=KLIF&SECTION=HOME',
+           'http://hosted.ap.org/lineups/POLITICSHEADS-rss_2.0.xml?SITE=SCGRE&SECTION=HOME',
+           'http://www.nytimes.com/services/xml/rss/nyt/HomePage.xml',
            'http://www.nytimes.com/services/xml/rss/nyt/International.xml',
-           'http://news.google.com/?output=rss', 
-           'http://feeds.salon.com/salon/news', 
-           'http://www.foxnews.com/xmlfeed/rss/0,4313,0,00.rss',
-           'http://www.foxnews.com/xmlfeed/rss/0,4313,80,00.rss', 
-           'http://www.foxnews.com/xmlfeed/rss/0,4313,81,00.rss', 
-           'http://rss.cnn.com/rss/edition.rss']
-          # 'http://rss.cnn.com/rss/edition_world.rss', 
-          # 'http://rss.cnn.com/rss/edition_us.rss'] 
+           'http://news.google.com/?output=rss',]
+           #'http://feeds.salon.com/salon/news', 
+           #'http://www.foxnews.com/xmlfeed/rss/0,4313,0,00.rss',
+           #'http://www.foxnews.com/xmlfeed/rss/0,4313,80,00.rss', 
+           #'http://www.foxnews.com/xmlfeed/rss/0,4313,81,00.rss', 
+           #'http://rss.cnn.com/rss/edition.rss',
+           #'http://rss.cnn.com/rss/edition_world.rss', 
+           #'http://rss.cnn.com/rss/edition_us.rss'] 
 
 	attr :all_words
 	attr :article_words
@@ -175,7 +178,7 @@ class FeatureFinder
 		get_article_words
 		make_matrix
 		# weights,features = make_matrix.factorize(10,50)
-		weights,features = @matrix.factorize(10,50)
+		weights,features = @matrix.factorize(20,50)
 		[@article_titles, @wordvec, weights,features]
 	end
 
@@ -190,7 +193,6 @@ class FeatureFinder
 				next if @article_titles.include?(entry.title)				
 				process_entry(entry)
 				@ec += 1
-				puts @ec
 			end
 		end
 		# [@all_words, @article_words, @article_titles] s 
@@ -229,7 +231,7 @@ class FeatureDisplayer
 		ff = FeatureFinder.new
 		artt,wordvec,weights,features = ff.titles_and_matrix
 	  topp,pn = show_features(weights,features,artt,wordvec)
-		show_articles(artt,topp,pn)
+	#	show_articles(artt,topp,pn)
 	end
 
 	def show_features(w,h,titles,wordvec,out='features.txt')
@@ -242,11 +244,12 @@ class FeatureDisplayer
 		titles.length.times { |i| @toppatterns[i] = []}
 		@patternnames = []
 
+		puts "pc=" + pc.to_s
+		File.open(out, 'w') { |results| pc.times { |i|  process_feature(i, results)}}
 
-		File.open(out, 'w') { |results| pc.times { |i| process_feature(i, results)}}
-
-		@toppatterns = @toppatterns.reject{|a| a.empty?}
-		[@toppatterns, @patternnames]
+	#	@toppatterns = @toppatterns.reject{|a| a.empty?}
+	#	[@toppatterns, @patternnames]
+		[1,2]
 	end
 
 	def process_feature(i, results)
@@ -258,12 +261,8 @@ class FeatureDisplayer
 			@slist << [@h[i,j], @wordvec[j]]
 		end
 
-		begin
 		@slist = @slist.sort.reverse
-		rescue
-			$slist = @slist
-			fail
-		end
+		
 		n = @slist[0..6].map do |s|
 			s[1]
 		end
