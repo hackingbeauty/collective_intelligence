@@ -139,22 +139,21 @@ end
 
 class FeatureFinder
 
-	FEEDLIST = ['http://feeds.reuters.com/reuters/topNews', 
+	FEEDLIST = ['http://feeds.reuters.com/reuters/topNews',
           'http://feeds.reuters.com/reuters/domesticNews',
-          'http://feeds.reuters.com/reuters/worldNews']
-
-          # 'http://hosted.ap.org/lineups/TOPHEADS-rss_2.0.xml', 
-          # 'http://hosted.ap.org/lineups/USHEADS-rss_2.0.xml', 
-          # 'http://hosted.ap.org/lineups/WORLDHEADS-rss_2.0.xml', 
-          # 'http://hosted.ap.org/lineups/POLITICSHEADS-rss_2.0.xml', 
-          # 'http://www.nytimes.com/services/xml/rss/nyt/HomePage.xml', 
-          # 'http://www.nytimes.com/services/xml/rss/nyt/International.xml', 
-          # 'http://news.google.com/?output=rss', 
-          # 'http://feeds.salon.com/salon/news', 
-          # 'http://www.foxnews.com/xmlfeed/rss/0,4313,0,00.rss', 
-          # 'http://www.foxnews.com/xmlfeed/rss/0,4313,80,00.rss', 
-          # 'http://www.foxnews.com/xmlfeed/rss/0,4313,81,00.rss', 
-          # 'http://rss.cnn.com/rss/edition.rss', 
+           'http://feeds.reuters.com/reuters/worldNews',
+           'http://hosted.ap.org/lineups/TOPHEADS-rss_2.0.xml?SITE=NCWIN&SECTION=HOME',
+           'http://hosted.ap.org/lineups/USHEADS-rss_2.0.xml?SITE=OKPON&SECTION=HOME',
+           'http://hosted.ap.org/lineups/WORLDHEADS-rss_2.0.xml?SITE=KLIF&SECTION=HOME', 
+           'http://hosted.ap.org/lineups/POLITICSHEADS-rss_2.0.xml?SITE=SCGRE&SECTION=HOME', 
+           'http://www.nytimes.com/services/xml/rss/nyt/HomePage.xml', 
+           'http://www.nytimes.com/services/xml/rss/nyt/International.xml',
+           'http://news.google.com/?output=rss', 
+           'http://feeds.salon.com/salon/news', 
+           'http://www.foxnews.com/xmlfeed/rss/0,4313,0,00.rss',
+           'http://www.foxnews.com/xmlfeed/rss/0,4313,80,00.rss', 
+           'http://www.foxnews.com/xmlfeed/rss/0,4313,81,00.rss', 
+           'http://rss.cnn.com/rss/edition.rss']
           # 'http://rss.cnn.com/rss/edition_world.rss', 
           # 'http://rss.cnn.com/rss/edition_us.rss'] 
 
@@ -224,6 +223,8 @@ end
 
 class FeatureDisplayer
 	
+	attr :slist
+
 	def initialize
 		ff = FeatureFinder.new
 		artt,wordvec,weights,features = ff.titles_and_matrix
@@ -238,20 +239,12 @@ class FeatureDisplayer
 		@titles = titles
 		pc,@wc=h.vsize,h.hsize
 		@toppatterns = []
-		titles.length.times do |i|
-			@toppatterns[i] = []
-		end
+		titles.length.times { |i| @toppatterns[i] = []}
 		@patternnames = []
 
 
+		File.open(out, 'w') { |results| pc.times { |i| process_feature(i, results)}}
 
-		File.open(out, 'w') do |results|
-		
-			pc.times do |i|
-				process_feature(i, results)
-			end
-
-		end
 		@toppatterns = @toppatterns.reject{|a| a.empty?}
 		[@toppatterns, @patternnames]
 	end
@@ -265,8 +258,12 @@ class FeatureDisplayer
 			@slist << [@h[i,j], @wordvec[j]]
 		end
 
+		begin
 		@slist = @slist.sort.reverse
-
+		rescue
+			$slist = @slist
+			fail
+		end
 		n = @slist[0..6].map do |s|
 			s[1]
 		end
@@ -309,4 +306,4 @@ class FeatureDisplayer
 
 end
 
-FeatureDisplayer.new
+@fd = FeatureDisplayer.new
