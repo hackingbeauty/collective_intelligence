@@ -1,0 +1,35 @@
+york, from, gaza, hudson, articles, that
+6		Crashed jet raised from Hudson River - Reuters
+5		US Airways Jet Lifted From Hudson - Wall Street Journal
+5		Questions and answers on Gaza&#39;s next steps - International Herald Tribune
+
+
+
+city, circuit, times, articles, angeles, bloomberg
+11		Bedlam breaks out at Circuit City - CNET News
+2		US-ENTERTAINMENT Summary - Washington Post
+2		Spagnuolo Agrees to Four-Year Contract as Rams’ Coach - Bloomberg
+
+
+
+quot, treasury, absolutely, geithner, despite, aide
+10		Obama backs Treasury pick &quot;absolutely&quot;: aide - Reuters
+3		Obama backs Treasury pick "absolutely": aide
+3		&#39;This Week&#39; Transcript: David Axelrod - ABC News
+
+
+
+peanut, butter, little, debbie, crackers, salmonella
+11		Little Debbie peanut butter crackers recalled - The Associated Press
+4		Little Debbie peanut butter crackers recalled
+4		FDA: Put off eating peanut butter products
+
+
+
+deal, year, hamels, phillies, philadelphia, press
+11		Hamels, Phillies agree on 3-year deal, $20.5M deal - The Associated Press
+4		Price details unclear in murky Russia-Ukraine deal - guardian.co.uk
+2		Spagnuolo Agrees to Four-Year Contract as Rams’ Coach - Bloomberg
+
+
+

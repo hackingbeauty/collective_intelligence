@@ -1,0 +1,115 @@
+Words: [boston, globe, angeles, times, articles, hours]
+4.45453275806855  /   Turkey's PM travels to Brussels to bolster EU bid
+4.43999843909528  /   Kellogg recalls peanut butter products
+4.27887338215619  /   Obama embarks on train to inaugural history
+
+
+Words: [president, elect, barack, washington, seeks, reuters]
+6.68312745669954  /   India Plans Heavy Spending to Stimulate Growth - Wall Street Journal
+6.58914771212381  /   Your at-home guide to the Inauguration - San Jose Mercury News
+5.76246253941588  /   China confirms toddler infected with bird flu
+
+
+Words: [airways, hudson, river, york, that, from]
+5.84908971243008  /   Toyota recalls 214,500 Lexus vehicles in U.S.
+4.52956844658934  /   'We can't pay you yet,' California to tell creditors
+4.26386330773356  /   You never know which &#39;Tara&#39; you&#39;re going to get - Los Angeles Times
+
+
+Words: [year, guardian, have, arizona, officials, sunday]
+5.11590632029682  /   Steelers wary of ball-hawking Ravens - St. Louis Post-Dispatch
+4.56510336867357  /   What went right, wrong on Flight 1549
+4.54770963418455  /   Tamil Tiger head may have fled Sri Lanka: army chief
+
+
+Words: [reuters, said, sunday, state, over, government]
+10.1499482040302  /   Battered Wall St tops Obama inaugural donors: study
+6.74794679117123  /   "Erroneous" Western democracy not for China: official
+5.90010199491309  /   D.C. visitors looking to be part of history
+
+
+Words: [chronicle, francisco, york, times, articles, post]
+9.55584785305291  /   Obama stimulus plan not sure bet to heal economy
+8.30668771575976  /   Obama seeks help in surmounting country's problems
+7.50063474053872  /   Officials, mom: Insurance help is critical - Martinsville Bulletin
+
+
+Words: [street, wall, journal, times, hours, articles]
+12.2374227183865  /   Sri Lankan army &#39;corners rebels&#39; - BBC News
+9.45716514764286  /   Six Guantanamo detainees released
+1.75431165099011  /   Steer clear of peanut butter: U.S. authorities
+
+
+Words: [sunday, deal, which, prime, ukraine, russia]
+10.726549868647  /   Gaza rockets hit Israel despite unilateral ceasefire
+7.26432173492821  /   Geese Pose Big Risk at Airports in Region - New York Times
+5.27969965232656  /   MARTIN LUTHER KING DAY EVENTS: Honoring a civil rights legend - Newsday
+
+
+Words: [2009, press, bill, articles, congress, post]
+13.6573367429502  /   Debris kills boy in stands at monster truck show
+6.04814799712188  /   Older Americans postpone retirement as economy sags
+0.650420043510366  /   Obama embarks on train to inaugural history
+
+
+Words: [israel, unilateral, ceasefire, gaza, into, sunday]
+7.53748861180561  /   A formal house that has a family in it - Baltimore Sun
+4.51953705489794  /   Not card-carrying Cardinals fan - Boston Globe
+4.14742582839646  /   Almost all U.S. cities to lose jobs in 2009: forecast
+
+
+Words: [will, that, first, washington, president, barack]
+7.75424082732704  /   Obama team seeks fresh approach to bank crisis
+7.57634969715474  /   Crippled jetliner hoisted from Hudson River
+6.69264523151874  /   Bomb and helicopter crash kills 2 U.S. troops, 4 Afghans
+
+
+Words: [city, into, saturday, washington, that, help]
+9.37498624518006  /   America: What in the world does it want to be?
+8.62330732904569  /   High court to hear strip-searched teen's case
+5.64226208423239  /   Obama to lay wreath, attend concert Sunday
+
+
+Words: [daily, associated, press, hours, star, articles]
+6.22643184363662  /   Obama aide: Military advisers to meet on first day
+4.85331140962815  /   Lewis’s Merrill, Countrywide Buys May Hurt Him, Bank of America - Bloomberg
+4.81708635100822  /   Russia, Ukraine PMs say reach gas deal
+
+
+Words: [history, inaugural, washington, from, world, lincoln]
+10.1635526804569  /   Biden in spotlight at hometown whistle stop visit
+5.08128625146224  /   Celtics starters pour it on in back-to-back beatings of Nets - Boston Globe
+3.03324942130444  /   Digital TV Delay Runs Into Protest - New York Times
+
+
+Words: [more, about, other, officials, washington, health]
+5.21590994086411  /   Crews hoist ditched plane from Hudson River
+4.18569707890758  /   Congress is going along with Obama, at least for now - Detroit Free Press
+3.78940332155646  /   Nation&#39;s Hopes High for Obama, Poll Shows - Washington Post
+
+
+Words: [saturday, from, said, military, guantanamo, reuters]
+13.0837873894604  /   How Wyeth’s “Helga” Went Viral Before Viral Existed - MSNBC
+6.48860670179008  /   Obama Cabinet headed toward quick Senate approval
+1.45044904006144  /   Steve Jobs, chained to a rock - CNNMoney.com
+
+
+Words: [have, tamil, army, rebels, lanka, said]
+4.1484372665744  /   5 white-knuckled minutes aboard Flight 1549
+3.52798491315961  /   Health Highlights: Jan. 17, 2009 - Washington Post
+3.44478722504142  /   Japan PM, opposition rally members as poll looms
+
+
+Words: [with, washington, said, after, york, this]
+8.92569339568056  /   Economic stimulus bill to fuel Obama's priorities
+8.7582090220588  /   A national hero but not quite in the spotlight
+7.78767696867431  /   Celtics starters pour it on in back-to-back beatings of Nets - Boston Globe
+
+
+Words: [peanut, butter, products, salmonella, consumers, eating]
+12.6132806116738  /   FDA: Put off eating peanut butter products
+5.40803698664392  /   Warning Is Issued on Foods Having Peanut Butter - New York Times
+1.96847325427071  /   Officials Find Flight 1549’s Black Boxes - New York Times
+
+
+Words: [jose, mercury, concert, baltimore, quot, when]
