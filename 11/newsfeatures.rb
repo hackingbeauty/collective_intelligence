@@ -16,6 +16,7 @@ require 'feed-normalizer'
 require 'open-uri'
 require 'spec'
 require 'linalg'
+require 'ruby-debug'
 
 ################# support
 
@@ -27,7 +28,7 @@ class String
 	end
 
 	def separate_words
-		scan(/\w*/).map {|s| s.downcase if s.length > 3}.compact
+		scan(/\w*/).select {|s| s.length > 3}.map{|s| s.downcase}
 	end
 
 end
@@ -81,22 +82,29 @@ class Linalg::DMatrix
 
 	# Measure how close the features and weights matrix is
 	def difcost(computed)
+		i = 0 
 		[*0..vsize-1].inject(0) do |sum, row|
-			hsize.times { |column| sum += (self[row,column] - computed[row,column]) ** 2 }
+			hsize.times do	|column| 
+				# puts i if i%1000 == 0
+				i += 1
+				sum += ((self[row,column] - computed[row,column]) ** 2) 
+			end
 			sum
 		end
 	end
 
 	# Initialize the weight and feature matrices with random values
 	def random_matrix(vs, hs)
-		Linalg::DMatrix[*([*0..vs].map { |i| [*0..hs].map { |j| (rand * 10).round.to_i } })]
+		Linalg::DMatrix[*([*0..vs].map { |i| [*0..hs].map { |j| (rand) } })]
 	end
 
 	def factorize(pc=10, iterations=50)
 		
 		w = random_matrix(vsize-1, pc-1)
 		h = random_matrix(pc-1, hsize-1) 
-		
+	
+	#	debugger
+
 		iterations.times do |i|
 			seed = w*h
 			cost = difcost(seed)
@@ -151,9 +159,9 @@ class FeatureFinder
            'http://hosted.ap.org/lineups/POLITICSHEADS-rss_2.0.xml?SITE=SCGRE&SECTION=HOME',
            'http://www.nytimes.com/services/xml/rss/nyt/HomePage.xml',
            'http://www.nytimes.com/services/xml/rss/nyt/International.xml',
-           'http://news.google.com/?output=rss',]
+           'http://news.google.com/?output=rss',
            #'http://feeds.salon.com/salon/news', 
-           #'http://www.foxnews.com/xmlfeed/rss/0,4313,0,00.rss',
+           'http://www.foxnews.com/xmlfeed/rss/0,4313,0,00.rss',]
            #'http://www.foxnews.com/xmlfeed/rss/0,4313,80,00.rss', 
            #'http://www.foxnews.com/xmlfeed/rss/0,4313,81,00.rss', 
            #'http://rss.cnn.com/rss/edition.rss',
@@ -170,16 +178,16 @@ class FeatureFinder
 	def initialize
 		@all_words = Hash.new(0)
 		@article_words = Hash.new {|h, k| h[k] = Hash.new(0)}
-		@article_titles = []; @wordvec =[]
+		@titles = []; @wordvec =[]
 		@ec=0
 	end
 
-	def titles_and_matrix
+	def data
 		get_article_words
 		make_matrix
 		# weights,features = make_matrix.factorize(10,50)
 		weights,features = @matrix.factorize(20,50)
-		[@article_titles, @wordvec, weights,features]
+		[@titles, @wordvec, weights,features]
 	end
 
 
@@ -188,19 +196,23 @@ class FeatureFinder
 	# as well as how many times it's used per article
 	def get_article_words
 		FEEDLIST.each do |feed|
-			next unless (f = FeedNormalizer::FeedNormalizer.parse open(feed))
+			f = FeedNormalizer::FeedNormalizer.parse open(feed)
+			i = 0
 			f.entries.each do |entry|
-				next if @article_titles.include?(entry.title)				
+				i += 1
+				next if @titles.include?(entry.title)				
 				process_entry(entry)
 				@ec += 1
 			end
+			puts "added #{i} entries from #{feed}"
 		end
+		puts "title len: #{@titles.length}"
 		# [@all_words, @article_words, @article_titles] s 
 	end
 
 	def process_entry(entry)
 		words = "#{entry.title} #{entry.content.strip_html}".separate_words
-		@article_titles << entry.title
+		@titles << entry.title
 
 		words.each do |word|
 			@all_words[word] += 1
@@ -229,19 +241,18 @@ class FeatureDisplayer
 
 	def initialize
 		ff = FeatureFinder.new
-		artt,wordvec,weights,features = ff.titles_and_matrix
-	  topp,pn = show_features(weights,features,artt,wordvec)
+		@titles,@wordvec,@weights,@features = ff.data
+	  topp,pn = show_features #(weights,features,titles,wordvec)
 	#	show_articles(artt,topp,pn)
 	end
 
-	def show_features(w,h,titles,wordvec,out='features.txt')
-		@h = h
-		@w = w
-		@wordvec = wordvec
-		@titles = titles
-		pc,@wc=h.vsize,h.hsize
+	def show_features(out='features.txt') #(w,h,titles,wordvec,out='features.txt')
+		pc = @features.vsize
+		@wc =	@features.hsize
+
 		@toppatterns = []
-		titles.length.times { |i| @toppatterns[i] = []}
+		@titles.length.times { |i| @toppatterns[i] = []}
+		puts "titles len = #{@titles.length}"
 		@patternnames = []
 
 		puts "pc=" + pc.to_s
@@ -258,7 +269,7 @@ class FeatureDisplayer
 		
 		#create a list of words and their weights
 		@wc.times do |j|
-			@slist << [@h[i,j], @wordvec[j]]
+			@slist << [@features[i,j], @wordvec[j]]
 		end
 
 		@slist = @slist.sort.reverse
@@ -273,8 +284,8 @@ class FeatureDisplayer
 		flist = []
 
 		@titles.length.times do |j|
-			flist[@w[j,i]] = @titles[j]
-			@toppatterns[j] << [@w[j,i], i, @titles[j]]
+			flist[@weights[j,i]] = @titles[j]
+			@toppatterns[j] << [@weights[j,i], i, @titles[j]]
 		end
 
 		flist = flist.compact.sort.reverse
