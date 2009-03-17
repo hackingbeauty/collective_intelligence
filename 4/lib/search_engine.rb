@@ -201,7 +201,41 @@ class Searcher
 		[rows, wordids]
 	end
 
+	def getscoredlist(rows, wordids)
+		# wow lame
+		totalscores = rows.inject({}) do |hash, row| 
+			hash[row[0]] = 0
+			hash
+		end
 
+		#debugger
+		
+		weights  = []
+
+		weights.each do |weight, scores|
+			totalscores.each do |url|
+				totalscores[url] += weight * scores[url]
+			end
+		end
+
+		totalscores
+	end
+
+	def geturlname(id)
+		@con.execute("select url from urllist where rowid=#{id}").first[0]
+	end
+
+	def query(q)
+		rows,wordids = getmatchrows(q)
+		scores = getscoredlist(rows,wordids)
+		rankedscores = scores.map do |url, score|
+			[score,url]	
+		end.reverse
+
+		rankedscores[0..10].each do |score, urlid|
+			puts "#{score}\t#{geturlname(urlid)}"
+		end
+	end
 
 end
 
