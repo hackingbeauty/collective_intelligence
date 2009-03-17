@@ -212,7 +212,8 @@ class Searcher
 
 		#debugger
 		
-		weights  = [[1.0, frequencyscore(rows)]]
+		weights  = [[1.0, frequencyscore(rows)],
+								[1.5, locationscore(rows)]]
 
 		weights.each do |weight, scores|
 			totalscores.each do |key, value|
@@ -246,6 +247,20 @@ class Searcher
 		end
 		rows.each {|row| counts[row[0]] += 1}
 		normalizescores(counts)
+	end
+
+	def locationscore(rows)
+		locations = rows.inject({}) do |hash, row| 
+			hash[row[0]] = 1000000
+			hash
+		end
+
+		rows.each do |row|
+			loc = row[1..-1].inject(0){|sum, n| sum += n.to_i}
+			locations[row[0]] = loc if loc < locations[row[0]]
+		end
+
+		normalizescores(locations, true)
 	end
 
 	def geturlname(id)
