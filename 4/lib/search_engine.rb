@@ -157,7 +157,7 @@ c = Crawler.new('searchindex.db')
 class Searcher
 
 	def initialize(dbname)
-		SQLite3::Database.new(dbname)
+		@con = SQLite3::Database.new(dbname)
 	end
 
 	def del
@@ -165,6 +165,7 @@ class Searcher
 	end
 
 	def getmatchrows(q)
+		
 		# Strings to build the query
 		fieldlist = 'w0.urlid'
 		tablelist=''
@@ -177,16 +178,32 @@ class Searcher
 
 		words.each do |word|
 			# get the word ID
-		wordrow = @con.execute(%Q{select rowid from wordlist where word='#{word}'})
-		if wordrow != nil
-		wordid = wordrow[0]
-		wordids << wordid
-		if tablenumber > 0
-			tablelist += ','
-			clauselist += ' and '
-			clauselist += %{w#{tablenumber-1}}.urlid and 'tablenumber-1, tablenumber
-			# fieldlist += 
+			wordrow = @con.execute(%Q{select rowid from wordlist where word='#{word}'})
+			if wordrow != nil
+				wordid = wordrow[0]
+				wordids << wordid
+				if tablenumber > 0
+					tablelist += ','
+					clauselist += ' and '
+					clauselist += %Q|w#{tablenumber - 1}.urlid=w#{tablenumber}.urlid and |
+				end
+				fieldlist += ", w#{tablenumber}.location"
+				tablelist += "wordlocation w#{tablenumber}"
+				clauselist += "w#{tablenumber}.wordid=#{wordid}"
+				tablenumber += 1
+			end
 		end
+		
+		fullquery = "select #{fieldlist} from #{tablelist} where #{clauselist}"
+		cur = @con.execute(fullquery)
+		rows = cur #?
+		
+		[rows, wordids]
 	end
 
+
+
 end
+
+
+@searcher = Searcher.new('searchindex.db')
