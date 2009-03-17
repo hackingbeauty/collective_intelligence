@@ -8,6 +8,8 @@ class Crawler
 
 	IGNORE_WORDS = ['the','of','to','and','a','in','is','it']
 
+	attr_accessor :con
+
 	def initialize(dbname)
 		@con = SQLite3::Database.new(dbname)
 	end
@@ -146,7 +148,7 @@ end
 
 
 #system('rm searchindex.db')
-c = Crawler.new('searchindex.db')
+@c = Crawler.new('searchindex.db')
 #c.createindextables
 
 #c.crawl(['http://kiwitobes.com/wiki/Perl.html'])
@@ -178,7 +180,7 @@ class Searcher
 
 		words.each do |word|
 			# get the word ID
-			wordrow = @con.execute(%Q{select rowid from wordlist where word='#{word}'})
+			wordrow = @con.execute(%Q{select rowid from wordlist where word='#{word.downcase}'})
 			if wordrow != nil
 				wordid = wordrow[0]
 				wordids << wordid
@@ -210,15 +212,40 @@ class Searcher
 
 		#debugger
 		
-		weights  = []
+		weights  = [[1.0, frequencyscore(rows)]]
 
 		weights.each do |weight, scores|
-			totalscores.each do |url|
-				totalscores[url] += weight * scores[url]
+			totalscores.each do |key, value|
+				totalscores[key] += weight * (scores[key] || 0)
 			end
 		end
 
 		totalscores
+	end
+
+	def normalizescores(scores, smallIsBetter=false)
+		vsmall = 0.00001
+		hash = {}
+
+		if smallIsBetter
+			minscore = scores.values.min
+			scores.each {|u, l| hash[u] = minscore.to_f / [vsmall, l].max}
+		else
+			maxscore = scores.values.max
+			maxscore = vsmall if maxscore.zero?
+			scores.each {|u, c| hash[u] = c.to_f / maxscore } 
+		end
+
+		hash
+	end
+
+	def frequencyscore(rows)
+		counts = rows.inject({}) do |hash, row| 
+			hash[row[0]] = 0
+			hash
+		end
+		rows.each {|row| counts[row[0]] += 1}
+		normalizescores(counts)
 	end
 
 	def geturlname(id)
@@ -230,7 +257,7 @@ class Searcher
 		scores = getscoredlist(rows,wordids)
 		rankedscores = scores.map do |url, score|
 			[score,url]	
-		end.reverse
+		end.sort_by{|score, url| score}.reverse
 
 		rankedscores[0..10].each do |score, urlid|
 			puts "#{score}\t#{geturlname(urlid)}"
