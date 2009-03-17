@@ -204,12 +204,8 @@ class Searcher
 	end
 
 	def getscoredlist(rows, wordids)
-		# wow lame
-		totalscores = rows.inject({}) do |hash, row| 
-			hash[row[0]] = 0
-			hash
-		end
-
+		totalscores = rows.inject({}){|h, k| h[k[0]] = 0; h}
+		#
 		#debugger
 		
 		weights  = [[1.0, frequencyscore(rows)],
@@ -241,26 +237,24 @@ class Searcher
 	end
 
 	def frequencyscore(rows)
-		counts = rows.inject({}) do |hash, row| 
-			hash[row[0]] = 0
-			hash
-		end
+		counts = rows.inject({}){|h, k| h[k[0]] = 0; h}
+
 		rows.each {|row| counts[row[0]] += 1}
 		normalizescores(counts)
 	end
 
 	def locationscore(rows)
-		locations = rows.inject({}) do |hash, row| 
-			hash[row[0]] = 1000000
-			hash
-		end
-
+		locations = rows.inject({}){|h, k| h[k[0]] = 1000000; h}
 		rows.each do |row|
 			loc = row[1..-1].inject(0){|sum, n| sum += n.to_i}
 			locations[row[0]] = loc if loc < locations[row[0]]
 		end
 
 		normalizescores(locations, true)
+	end
+
+	def distancescore(rows)
+		
 	end
 
 	def geturlname(id)
