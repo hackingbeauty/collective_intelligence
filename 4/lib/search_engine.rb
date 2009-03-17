@@ -209,7 +209,9 @@ class Searcher
 		#debugger
 		
 		weights  = [[1.0, frequencyscore(rows)],
-								[1.5, locationscore(rows)]]
+								[1.5, locationscore(rows)],
+								[0.8, distancescore(rows)]
+								]
 
 		weights.each do |weight, scores|
 			totalscores.each do |key, value|
@@ -254,7 +256,16 @@ class Searcher
 	end
 
 	def distancescore(rows)
-		
+		return rows.inject({}){|h,k| h[k[0]] = 1.0} if rows[0].length <= 2	
+
+		mindistance = rows.inject({}){|h,k| h[k[0]] = 100000; h}
+
+		rows.each do |row|
+			dist = [*2..row.length].map{|i| (row[i].to_i - row[i-1].to_i).abs}.inject(0){|sum, n| sum += n}
+			mindistance[row[0]] = dist if dist < mindistance[row[0]]
+		end
+
+		normalizescores(mindistance, true)
 	end
 
 	def geturlname(id)
